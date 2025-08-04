@@ -16,3 +16,4 @@ async-trait = "0.1.88"
 rusqlite = { version = "0.37.0", features = ["bundled"] }
 tracing-subscriber = { version = "0.3", default-features = true }
 tracing = "0.1"
+openrouter-rs = "0.4.5"

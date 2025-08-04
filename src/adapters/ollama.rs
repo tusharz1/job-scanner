@@ -1,4 +1,4 @@
-use crate::core::model::Job;
+use crate::core::model::{Job, LlmAnalysis, MatchingJobTitles};
 use crate::domain::llm::AnalysisResult;
 use crate::domain::llm::LLMProvider;
 use crate::error::ScannerError::LlmError;
@@ -6,20 +6,7 @@ use crate::error::ScannerResult;
 use async_trait::async_trait;
 use ollama_rs::Ollama;
 use ollama_rs::generation::completion::request::GenerationRequest;
-use ollama_rs::generation::parameters::{FormatType, JsonSchema, JsonStructure};
-use serde::Deserialize;
-
-#[derive(JsonSchema, Deserialize, Debug)]
-struct MatchingJobTitles {
-    matching_jobs: Vec<Job>,
-}
-
-#[derive(JsonSchema, Deserialize, Debug)]
-struct LlmAnalysis {
-    is_match: bool,
-    score: u8,
-    reasoning: String,
-}
+use ollama_rs::generation::parameters::{FormatType, JsonStructure};
 
 pub struct OllamaProvider {
     ollama: Ollama,

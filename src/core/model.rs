@@ -16,3 +16,15 @@ pub struct Job {
     pub external_path: String,
     pub company_name: String,
 }
+
+#[derive(JsonSchema, Deserialize, Debug)]
+pub struct MatchingJobTitles {
+    pub matching_jobs: Vec<Job>,
+}
+
+#[derive(JsonSchema, Deserialize, Debug)]
+pub struct LlmAnalysis {
+    pub is_match: bool,
+    pub score: u8,
+    pub reasoning: String,
+}

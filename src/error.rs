@@ -1,3 +1,4 @@
+use openrouter_rs::error::OpenRouterError;
 // Application wide error type
 use thiserror::Error;
 
@@ -17,6 +18,9 @@ pub enum ScannerError {
 
     #[error("Database Error: {0}")]
     DatabaseError(#[from] rusqlite::Error),
+
+    #[error("Openrouter Error: {0}")]
+    OpenRouterProviderError(#[from] OpenRouterError),
 }
 
 pub type ScannerResult<T> = std::result::Result<T, ScannerError>;
