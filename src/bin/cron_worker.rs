@@ -9,16 +9,16 @@ use tracing::error;
 async fn main() -> ScannerResult<()> {
     tracing_subscriber::fmt::init();
 
-    let bytes = std::fs::read("/path/to/resume.pdf").unwrap(); //TODO: Accept resume as cmd arg
+    let settings = AppConfig::new()?;
+    let bytes = std::fs::read(settings.resume_path).unwrap();
     let resume_content: String = pdf_extract::extract_text_from_mem(&bytes).unwrap();
 
     let workday_client = std::sync::Arc::new(WorkdayClient::new());
-    let ollama_provider = std::sync::Arc::new(OllamaProvider::new("mistral:latest".to_string()));
+    let ollama_provider = std::sync::Arc::new(OllamaProvider::new(settings.llm.model_name));
     let storage = std::sync::Arc::new(SqliteStorage::new("job_scanner.db")?);
 
     loop {
-        let settings = AppConfig::default();
-        for company in settings.companies {
+        for company in &settings.companies {
             if let Err(e) = processor::process_company(
                 &company,
                 &resume_content,

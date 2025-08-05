@@ -7,6 +7,7 @@ use async_trait::async_trait;
 use ollama_rs::Ollama;
 use ollama_rs::generation::completion::request::GenerationRequest;
 use ollama_rs::generation::parameters::{FormatType, JsonStructure};
+use ollama_rs::models::ModelOptions;
 
 pub struct OllamaProvider {
     ollama: Ollama,
@@ -39,7 +40,11 @@ impl LLMProvider for OllamaProvider {
             FormatType::StructuredJson(Box::new(JsonStructure::new::<MatchingJobTitles>()));
         let res = self
             .ollama
-            .generate(GenerationRequest::new(self.model.clone(), prompt).format(format))
+            .generate(
+                GenerationRequest::new(self.model.clone(), prompt)
+                    .format(format)
+                    .options(ModelOptions::default().num_ctx(10000)),
+            )
             .await
             .map_err(|e| LlmError(e.to_string()))?;
 
@@ -63,13 +68,16 @@ impl LLMProvider for OllamaProvider {
         let format = FormatType::StructuredJson(Box::new(JsonStructure::new::<LlmAnalysis>()));
         let res = self
             .ollama
-            .generate(GenerationRequest::new(self.model.clone(), prompt).format(format))
+            .generate(
+                GenerationRequest::new(self.model.clone(), prompt)
+                    .format(format)
+                    .options(ModelOptions::default().num_ctx(10000)),
+            )
             .await
             .map_err(|e| LlmError(e.to_string()))?;
 
         let response: LlmAnalysis =
             serde_json::from_str(&res.response).map_err(|e| LlmError(e.to_string()))?;
-        println!("analyzing compelte");
         Ok(AnalysisResult {
             is_match: response.is_match,
             score: response.score,

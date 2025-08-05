@@ -30,7 +30,6 @@ where
     for job in matching_job {
         let description = job_source.get_job_details(&job, &company.api_url).await?;
         let analysis = llm.analyze_match(resume_text, &description).await?;
-        println!("{:?}", analysis);
         if analysis.is_match {
             println!(
                 "✅ MATCH FOUND: {} at {} (Score: {})",

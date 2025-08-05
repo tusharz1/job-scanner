@@ -66,7 +66,7 @@ impl JobSource for WorkdayClient {
     async fn get_job_list(&self, company: &Company) -> ScannerResult<Vec<Job>> {
         let url = format!("{}/jobs", company.api_url);
         let body = serde_json::json!({
-            "appliedFacets": {},
+            "appliedFacets": {"locationCountry" : ["c4f78be1a8f14da0ab49ce1162348a5e"]},
             "limit": self.limit,
             "offset": self.offset,
             "searchText": ""
@@ -91,7 +91,6 @@ impl JobSource for WorkdayClient {
                         external_path: j_info.externalPath.clone(),
                     })
                     .collect();
-                println!("reached here");
                 Ok(jobs)
             }
             Err(err) => Err(ScannerError::ApiError(err)),
@@ -99,10 +98,8 @@ impl JobSource for WorkdayClient {
     }
 
     async fn get_job_details(&self, job: &Job, base_url: &str) -> ScannerResult<String> {
-        println!("insidee get_job_details");
         let url = format!("{}{}", base_url, job.external_path);
         let resp = self.client.get(&url).send().await?;
-        println!("got resp for job details");
         let text = resp.text().await?;
         let job_des = serde_json::from_str::<JobPostingDetails>(&text)?;
         Ok(job_des.jobPostingInfo.jobDescription)

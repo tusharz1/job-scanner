@@ -1,0 +1,20 @@
+{
+  "resume_path": "/home/user/Desktop/Tushar_Adhatrao_CV.pdf",
+  "llm": {
+    "model_name": "qwen3:0.6b"
+  },
+  "companies": [
+    {
+      "name": "crowd strike",
+      "api_url": "https://crowdstrike.wd5.myworkdayjobs.com/wday/cxs/crowdstrike/crowdstrikecareers"
+    },
+    {
+      "name": "fractal",
+      "api_url": "https://fractal.wd1.myworkdayjobs.com/wday/cxs/fractal/Careers/jobs"
+    },
+    {
+      "name": "athena health",
+      "api_url": "https://athenahealth.wd1.myworkdayjobs.com/wday/cxs/athenahealth/External"
+    }
+  ]
+}

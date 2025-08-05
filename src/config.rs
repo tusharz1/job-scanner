@@ -1,9 +1,11 @@
+use crate::{core::model::Company, error::ScannerResult};
 use serde::{Deserialize, Serialize};
-
-use crate::core::model::Company;
+use std::fs::{self, read_to_string};
+use std::path::Path;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AppConfig {
+    pub resume_path: String,
     pub llm: LLMChoice,
     pub companies: Vec<Company>,
 }
@@ -11,32 +13,35 @@ pub struct AppConfig {
 #[allow(dead_code)]
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct LLMChoice {
-    model_name: String,
+    pub model_name: String,
 }
 
+#[allow(dead_code)]
 impl Default for AppConfig {
     fn default() -> Self {
         AppConfig {
+            resume_path: "".to_string(),
             llm: LLMChoice {
-                model_name: "mistral:latest".to_string(), //TODO: model name not getting picked from here
+                model_name: "mistral:latest".to_string(),
             },
-            companies: vec![
-             Company {
-                 name: "athena health".to_string(),
-                 api_url: "https://athenahealth.wd1.myworkdayjobs.com/wday/cxs/athenahealth/External".to_string(),
-             }
-            ,Company {
-                name: "adobe".to_string(),
-                api_url: "https://autodesk.wd1.myworkdayjobs.com/wday/cxs/autodesk/Ext".to_string(),
+            companies: vec![],
+        }
+    }
+}
+
+impl AppConfig {
+    pub fn new() -> ScannerResult<Self> {
+        let file_path = Path::new("data/companies.json");
+        match fs::exists(file_path) {
+            Ok(_) => {
+                let content = read_to_string(file_path)?;
+                let app_config: AppConfig = serde_json::from_str(&content)?;
+                Ok(app_config)
             }
-            ,Company {
-                name: "red hat".to_string(),
-                api_url: "https://redhat.wd5.myworkdayjobs.com/wday/cxs/redhat/Jobs".to_string(),
-            }
-            ,Company {
-                name: "blackrock".to_string(),
-                api_url: "https://blackrock.wd1.myworkdayjobs.com/wday/cxs/blackrock/BlackRock_Professional".to_string(),
-            }],
+            Err(err) => panic!(
+                "Please run the app from which `data/companies.json` can be read {}",
+                err
+            ),
         }
     }
 }
