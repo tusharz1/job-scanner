@@ -66,7 +66,7 @@ impl JobSource for WorkdayClient {
     async fn get_job_list(&self, company: &Company) -> ScannerResult<Vec<Job>> {
         let url = format!("{}/jobs", company.api_url);
         let body = serde_json::json!({
-            "appliedFacets": {"locationCountry" : ["c4f78be1a8f14da0ab49ce1162348a5e"]},
+            "appliedFacets": {"locationCountry" : ["c4f78be1a8f14da0ab49ce1162348a5e"]}, // filter for India location. TODO: Make these JobSource arguments
             "limit": self.limit,
             "offset": self.offset,
             "searchText": ""

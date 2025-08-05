@@ -39,7 +39,9 @@ where
             println!("Apply here: {}{}", company.api_url, job.external_path);
             println!("---");
 
-            storage.save_job(&job).await?;
+            storage
+                .save_job(&job, analysis.score, analysis.reasoning)
+                .await?;
         }
 
         storage.mark_seen(&job.id).await?;

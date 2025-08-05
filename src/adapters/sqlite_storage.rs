@@ -46,11 +46,11 @@ impl Storage for SqliteStorage {
         Ok(exists)
     }
 
-    async fn save_job(&self, job: &Job) -> ScannerResult<()> {
+    async fn save_job(&self, job: &Job, score: u8, reasoning: String) -> ScannerResult<()> {
         let conn = self.conn.lock().await;
         conn.execute(
             "INSERT OR REPLACE INTO matched_jobs (id, title, company, location, score, reasoning) VALUES (?, ?, ?, ?, ?, ?)",
-            params![job.id, job.title, job.company_name, job.location, 0, ""],
+            params![job.id, job.title, job.company_name, job.location, score, reasoning],
         )?;
         Ok(())
     }
