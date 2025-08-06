@@ -1,8 +1,8 @@
-use crate::error::{ScannerError, ScannerResult};
 use async_trait::async_trait;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
+use crate::error::{ScannerError, ScannerResult};
 use crate::{
     core::model::{Company, Job},
     domain::job_source::JobSource,
@@ -11,16 +11,16 @@ use crate::{
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct WorkdayJobInfo {
-    title: String,
-    externalPath: String,
-    locationsText: String,
+    pub title: String,
+    pub externalPath: String,
+    pub locationsText: String,
 }
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct WorkdayJobPosting {
-    total: i32,
-    jobPostings: Vec<WorkdayJobInfo>,
+    pub total: i32,
+    pub jobPostings: Vec<WorkdayJobInfo>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -103,5 +103,32 @@ impl JobSource for WorkdayClient {
         let text = resp.text().await?;
         let job_des = serde_json::from_str::<JobPostingDetails>(&text)?;
         Ok(job_des.jobPostingInfo.jobDescription)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_job_posting_details() {
+        let json_struct = r#"
+            {
+                "jobPostingInfo": {
+                    "id": "b87a7c2ed4c410010b13642c10b40000",
+                    "title": "Associate - Software Engineering",
+                    "jobDescription": "Some job description",
+                    "location": "B3G - Skyline Belgrade, Kneza Milosa 88, Belgrade",
+                    "postedOn": "Posted Yesterday"
+               }
+          }
+            "#;
+        let result = serde_json::from_str::<JobPostingDetails>(&json_struct);
+        assert!(result.is_ok());
+        let job_posting = result.unwrap();
+        assert_eq!(
+            job_posting.jobPostingInfo.jobDescription,
+            "Some job description"
+        );
     }
 }
