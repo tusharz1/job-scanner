@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use url::{Url, ParseError::EmptyHost};
-
+use serde_json::{Map, Value};
 use crate::error::{ScannerError, ScannerResult};
 use crate::{
     core::model::{Company, Job},
@@ -62,6 +62,7 @@ impl WorkdayClient {
     }
 }
 
+//TODO: The url should consider (ignore) locale
 fn workday_to_api_url(company_url: &str) -> ScannerResult<String> {
     let parsed_url = Url::parse(company_url)?;
     let domain = parsed_url.domain().ok_or_else(|| {
@@ -94,8 +95,28 @@ impl JobSource for WorkdayClient {
     async fn get_job_list(&self, company: &Company) -> ScannerResult<Vec<Job>> {
         let api_url = workday_to_api_url(&company.url)?;
         let url = format!("{}/jobs", api_url);
+        let mut applied_facets = Map::new();
+
+        if let Some(loc) = &company.locations {
+            if !loc.is_empty() {
+                applied_facets.insert(
+                    "locations".to_string(),
+                    Value::Array(vec![Value::String(loc.clone())]),
+                );
+            }
+        }
+
+        if let Some(country) = &company.locationCountry {
+            if !country.is_empty() {
+                applied_facets.insert(
+                    "locationCountry".to_string(),
+                    Value::Array(vec![Value::String(country.clone())]),
+                );
+            }
+        }
+
         let body = serde_json::json!({
-            "appliedFacets": {"locationCountry" : ["c4f78be1a8f14da0ab49ce1162348a5e"]}, // filter for India location. TODO: Make these JobSource arguments
+            "appliedFacets": Value::Object(applied_facets), 
             "limit": self.limit,
             "offset": self.offset,
             "searchText": ""
@@ -122,7 +143,12 @@ impl JobSource for WorkdayClient {
                     .collect();
                 Ok(jobs)
             }
-            Err(err) => Err(ScannerError::ApiError(err)),
+            Err(err) => {
+                let resp2 = self.client.post(&url).json(&body).send().await?;
+                let r = resp2.bytes().await?;
+                println!("err {} {:?}", err, r);
+                Err(ScannerError::ApiError(err))
+            },
         }
     }
 

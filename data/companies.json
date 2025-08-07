@@ -6,23 +6,28 @@
   "companies": [
     {
       "name": "Morgan Stanley",
-      "url": "https://ms.wd5.myworkdayjobs.com/External"
+      "url": "https://ms.wd5.myworkdayjobs.com/External",
+      "locations": "430f6a41665e10014f51cd6200820000"
     },
     {
       "name": "crowd strike",
-      "url": "https://crowdstrike.wd5.myworkdayjobs.com/crowdstrikecareers"
+      "url": "https://crowdstrike.wd5.myworkdayjobs.com/crowdstrikecareers",
+      "locationCountry": "c4f78be1a8f14da0ab49ce1162348a5e"
     },
     {
       "name": "fractal",
-      "url": "https://fractal.wd1.myworkdayjobs.com/Careers"
+      "url": "https://fractal.wd1.myworkdayjobs.com/Careers",
+      "locations": "7edfb62955d310014b6351f083a60000"
     },
     {
       "name": "athena health",
-      "url": "https://athenahealth.wd1.myworkdayjobs.com/External"
+      "url": "https://athenahealth.wd1.myworkdayjobs.com/External",
+      "locationCountry": "c4f78be1a8f14da0ab49ce1162348a5e"
     },
     {
         "name": "Morning Star",
-        "url": "https://morningstar.wd5.myworkdayjobs.com/Americas"
+        "url": "https://morningstar.wd5.myworkdayjobs.com/Americas",
+        "locations": "6a30583342834bee9099431bfefc5ff7"
     },
     {
         "name": "Red hat",
