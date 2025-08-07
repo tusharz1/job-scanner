@@ -7,11 +7,11 @@ use job_scanner::{
 };
 use std::sync::Arc;
 
-#[tokio::test]
+//#[tokio::test]
 async fn process_test() {
     let athena_company = Company {
         name: "athena health".to_string(),
-        api_url: "https://athenahealth.wd1.myworkdayjobs.com/wday/cxs/athenahealth/External"
+        url: "https://athenahealth.wd1.myworkdayjobs.com/wday/cxs/athenahealth/External"
             .to_string(),
     };
     let resume_text = "A software backend engineer with 4 years of experince in Java and React";

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Company {
     pub name: String,
-    pub api_url: String,
+    pub url: String,
 }
 
 #[derive(JsonSchema, Serialize, Deserialize, Debug, Clone)]

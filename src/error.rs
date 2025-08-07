@@ -1,6 +1,7 @@
 use openrouter_rs::error::OpenRouterError;
 // Application wide error type
 use thiserror::Error;
+use url::ParseError;
 
 #[derive(Error, Debug)]
 pub enum ScannerError {
@@ -21,6 +22,9 @@ pub enum ScannerError {
 
     #[error("Openrouter Error: {0}")]
     OpenRouterProviderError(#[from] OpenRouterError),
+
+    #[error("Url parser error: {0}")]
+    UrlParseError(#[from] ParseError)
 }
 
 pub type ScannerResult<T> = std::result::Result<T, ScannerError>;

@@ -28,7 +28,7 @@ where
     let matching_job = llm.filter_titles(filtered_jobs, resume_text).await?;
 
     for job in matching_job {
-        let description = job_source.get_job_details(&job, &company.api_url).await?;
+        let description = job_source.get_job_details(&job, &company.url).await?;
         let analysis = llm.analyze_match(resume_text, &description).await?;
         if analysis.is_match {
             println!(
@@ -36,7 +36,7 @@ where
                 job.title, company.name, analysis.score
             );
             println!("Reasoning: {}", analysis.reasoning);
-            println!("Apply here: {}{}", company.api_url, job.external_path);
+            println!("Apply here: {}{}", company.url, job.external_path);
             println!("---");
 
             storage

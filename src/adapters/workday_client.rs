@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use url::{Url, ParseError::EmptyHost};
 
 use crate::error::{ScannerError, ScannerResult};
 use crate::{
@@ -61,10 +62,38 @@ impl WorkdayClient {
     }
 }
 
+fn workday_to_api_url(company_url: &str) -> ScannerResult<String> {
+    let parsed_url = Url::parse(company_url)?;
+    let domain = parsed_url.domain().ok_or_else(|| {
+        ScannerError::UrlParseError(EmptyHost)
+    })?;
+    let host_parts: Vec<&str> = domain.split('.').collect();
+    if host_parts.len() < 3 || !host_parts[1].contains("wd") {
+        println!("host parts does not contain wd");
+        return Err(ScannerError::UrlParseError(EmptyHost));
+    }
+    let company = host_parts[0];
+    let wd_env = host_parts[1];
+    let path_segments: Vec<&str> = parsed_url
+        .path_segments()
+        .ok_or_else(|| ScannerError::UrlParseError(EmptyHost))?
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    let career_site = match path_segments.as_slice() {
+        [site] => *site,
+        _ => return Err(ScannerError::UrlParseError(EmptyHost))
+    };
+    let base = format!("https://{company}.{wd_env}.myworkdayjobs.com");
+    let api_url = format!("{base}/wday/cxs/{company}/{career_site}");
+    Ok(api_url)
+}
+
 #[async_trait]
 impl JobSource for WorkdayClient {
     async fn get_job_list(&self, company: &Company) -> ScannerResult<Vec<Job>> {
-        let url = format!("{}/jobs", company.api_url);
+        let api_url = workday_to_api_url(&company.url)?;
+        let url = format!("{}/jobs", api_url);
         let body = serde_json::json!({
             "appliedFacets": {"locationCountry" : ["c4f78be1a8f14da0ab49ce1162348a5e"]}, // filter for India location. TODO: Make these JobSource arguments
             "limit": self.limit,
@@ -97,8 +126,9 @@ impl JobSource for WorkdayClient {
         }
     }
 
-    async fn get_job_details(&self, job: &Job, base_url: &str) -> ScannerResult<String> {
-        let url = format!("{}{}", base_url, job.external_path);
+    async fn get_job_details(&self, job: &Job, company_url: &str) -> ScannerResult<String> {
+        let api_url = workday_to_api_url(company_url)?;
+        let url = format!("{}{}", api_url, job.external_path);
         let resp = self.client.get(&url).send().await?;
         let text = resp.text().await?;
         let job_des = serde_json::from_str::<JobPostingDetails>(&text)?;
@@ -130,5 +160,23 @@ mod tests {
             job_posting.jobPostingInfo.jobDescription,
             "Some job description"
         );
+    }
+
+    #[test]
+    fn test_parse_home_to_api_url() {
+        match workday_to_api_url("https://athenahealth.wd1.myworkdayjobs.com/External") {
+            Err(_) => panic!("parsing home to api url failed"),
+            Ok(res) => assert_eq!(res,"https://athenahealth.wd1.myworkdayjobs.com/wday/cxs/athenahealth/External")
+        };
+
+        match workday_to_api_url("https://redhat.wd5.myworkdayjobs.com/Jobs") {
+            Err(_) => panic!("parsing home to api url failed"),
+            Ok(res) => assert_eq!(res,"https://redhat.wd5.myworkdayjobs.com/wday/cxs/redhat/Jobs")
+        };
+
+        match workday_to_api_url("https://ms.wd5.myworkdayjobs.com/External") {
+            Err(_) => panic!("parsing home to api url failed"),
+            Ok(res) => assert_eq!(res,"https://ms.wd5.myworkdayjobs.com/wday/cxs/ms/External")
+        };
     }
 }

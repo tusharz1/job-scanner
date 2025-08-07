@@ -17,8 +17,8 @@ fn roundtrip_analysis_result() {
 fn roundtrip_company() {
     let company = Company {
         name: "test company".to_string(),
-        api_url: "test api url".to_string(),
+        url: "test api url".to_string(),
     };
     assert_eq!(company.name, "test company".to_string());
-    assert_eq!(company.api_url, "test api url".to_string());
+    assert_eq!(company.url, "test api url".to_string());
 }
